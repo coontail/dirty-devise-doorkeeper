@@ -45,8 +45,14 @@ module Devise
         token = ::Doorkeeper.authenticate(request)
         scopes = ::Doorkeeper.configuration.default_scopes
         invalid_token unless token && token.acceptable?(scopes)
-        mapping.to.find(token.resource_owner_id)
+        resource_owner_id = resource_owner_from(token)
+        mapping.to.find(resource_owner_id)
       end
+
+      def resource_owner_from(token)
+        token.resource_owner_id || token.application.owner_id
+      end
+
 
       def invalid_token
         fail!(WARDEN_INVALID_TOKEN_MESSAGE)
